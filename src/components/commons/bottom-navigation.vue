@@ -6,6 +6,7 @@
     v-model="tabName"
     @update:modelValue="onTabChange"
     mandatory
+    :height="80"
   >
     <v-btn value="list">
       <v-icon>mdi-calendar-range</v-icon>
