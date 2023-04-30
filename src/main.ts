@@ -1,7 +1,22 @@
 import { createApp } from "vue";
 import App from "./App.vue";
+
+// setup vuetify
 import vuetify from "./plugins/vuetify";
+
+// setup webfontloader
 import { loadFonts } from "./plugins/webfontloader";
+loadFonts();
+
+// setup axios
+import axios from "axios";
+import { useEnv } from "./utils/environment";
+const { API_URL } = useEnv();
+axios.defaults.baseURL = API_URL;
+// set global axios
+createApp(App).config.globalProperties.$axios = axios;
+
+// setup router
 import { routes } from "./routes";
 import { createRouter, createWebHistory } from "vue-router";
 const router = createRouter({
@@ -9,9 +24,8 @@ const router = createRouter({
   routes,
 });
 
+// setup pwa
 import { registerSW } from "virtual:pwa-register";
 registerSW();
-
-loadFonts();
 
 createApp(App).use(vuetify).use(router).mount("#app");
