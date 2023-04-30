@@ -8,17 +8,9 @@
     mandatory
     height="72"
   >
-    <v-btn value="list">
-      <v-icon>mdi-calendar-range</v-icon>
-      <span class="mb-3">一覧</span>
-    </v-btn>
-    <v-btn value="reserve">
-      <v-icon>mdi-calendar-edit</v-icon>
-      <span class="mb-3">予約</span>
-    </v-btn>
-    <v-btn value="schedule">
-      <v-icon>mdi-calendar-clock</v-icon>
-      <span class="mb-3">日調</span>
+    <v-btn v-for="tab in tabs" :key="tab.name" :value="tab.name">
+      <v-icon>{{ tab.icon }}</v-icon>
+      <span class="mb-3">{{ tab.text }}</span>
     </v-btn>
   </v-bottom-navigation>
 </template>
@@ -28,11 +20,14 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 const router = useRouter();
 
-type TabName = "list" | "reserve" | "schedule";
+const tabs = [
+  { text: "一覧", name: "list", icon: "mdi-calendar-range" },
+  { text: "予約", name: "reserve", icon: "mdi-calendar-edit" },
+  { text: "日調", name: "schedule", icon: "mdi-calendar-clock" },
+] as const;
 
+type TabName = (typeof tabs)[number]["name"];
 const tabName = ref<TabName>("list");
 
-const onTabChange = (tabName: TabName) => {
-  router.push({ name: tabName });
-};
+const onTabChange = (tabName: TabName) => router.push({ name: tabName });
 </script>
