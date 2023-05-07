@@ -1,7 +1,17 @@
 <template>
   <v-row justify="end">
-    <v-spacer />
     <v-col>
+      <v-btn
+        color="indigo-darken-4"
+        prepend-icon="mdi-calendar-today"
+        variant="outlined"
+        @click="shiftToday"
+      >
+        Today
+      </v-btn>
+    </v-col>
+    <v-spacer />
+    <v-col v-if="false">
       <v-btn-toggle
         v-model="type"
         rounded="md"
@@ -18,58 +28,13 @@
   </v-row>
   <v-row>
     <v-col v-if="type === 'd'">
-      <p class="text-h6 font-weight-bold">
-        {{ formatDate(day.date, "YYYY年M月D日 (ddd)") }}
-      </p>
-      <v-timeline side="end">
-        <v-timeline-item
-          v-for="reservation in day.reservations"
-          :key="reservation.id"
-          dot-color="indigo"
-          icon="mdi-calendar-account"
-          fill-dot
-          size="small"
-          width="200"
-        >
-          <template #opposite>
-            <span class="text-caption font-weight-bold"
-              >{{
-                formatDate(`${day.date} ${reservation.time.start}:00`, "H:mm")
-              }}
-              -
-              {{
-                formatDate(`${day.date} ${reservation.time.end}:00`, "H:mm")
-              }}</span
-            >
-          </template>
-          <v-card elevation="3">
-            <v-card-title class="text-body-2">
-              {{ reservation.name }}
-            </v-card-title>
-            <v-card-actions>
-              <v-row>
-                <v-spacer />
-                <v-col>
-                  <v-btn
-                    icon="mdi-pencil"
-                    variant="tonal"
-                    density="compact"
-                    color="warning"
-                  />
-                  <v-btn
-                    icon="mdi-delete"
-                    variant="tonal"
-                    density="compact"
-                    color="red-darken-1"
-                  />
-                </v-col>
-              </v-row>
-            </v-card-actions>
-          </v-card>
-        </v-timeline-item>
-      </v-timeline>
+      <daily-timeline :day="day" @shift="shiftDate" />
     </v-col>
-    <v-col v-else-if="type === 'w'"> 週ごと </v-col>
+    <v-col v-else-if="type === 'w'">
+      <p class="text-h6 font-weight-bold" v-for="(day, key) in days" :key="key">
+        {{ formatDate(day.date, "M/D(ddd)") }}
+      </p>
+    </v-col>
   </v-row>
 </template>
 
@@ -79,6 +44,7 @@ import { useRoute, useRouter } from "vue-router";
 import { Day } from "@/types";
 import axios from "axios";
 import { formatDate } from "@/utils/dateFormatter";
+import DailyTimeline from "./daily-timeline.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -88,8 +54,23 @@ if (["d", "w"].includes(route.query.t as string)) {
   type.value = route.query.t as "d" | "w";
 }
 
-const onChangeType = () =>
+const onChangeType = () => {
   router.push({ query: { ...route.query, t: type.value } });
+  fetchReservations();
+};
+
+const shiftDate = (diff: number): void => {
+  page.value += diff;
+  router.push({ query: { ...route.query, p: page.value } });
+  fetchReservations();
+};
+
+const shiftToday = (): void => {
+  if (page.value === 0) return;
+  page.value = 0;
+  router.push({ query: { ...route.query, p: page.value } });
+  fetchReservations();
+};
 
 const page = ref<number>(0);
 if (route.query.p !== undefined) {
@@ -102,7 +83,7 @@ const day = ref<Day>({
   reservations: [],
 });
 
-onMounted(async () => {
+const fetchReservations = async () => {
   const { data } = await axios.get<Day[]>("/reserve", {
     params: {
       t: type.value,
@@ -111,7 +92,9 @@ onMounted(async () => {
   });
   days.value = data;
   day.value = data[0];
+};
 
-  // set query params "type"
+onMounted(async () => {
+  await fetchReservations();
 });
 </script>

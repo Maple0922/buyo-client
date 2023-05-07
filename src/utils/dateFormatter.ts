@@ -18,6 +18,8 @@ export const formatYearDate = (date: string) => {
 };
 
 export const formatDate = (date: string, format = "M/D(ddd)") => {
-  moment.locale("ja");
+  moment.locale("ja", {
+    weekdaysShort: ["日", "月", "火", "水", "木", "金", "土"],
+  });
   return moment(date).isValid() ? moment(date).format(format) : "";
 };

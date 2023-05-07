@@ -6,8 +6,18 @@ export const routes = [
   },
   {
     path: "/reserve",
-    name: "reserve",
-    component: () => import("./components/pages/reserve/index.vue"),
+    children: [
+      {
+        path: "",
+        name: "reserve",
+        component: () => import("./components/pages/reserve/index.vue"),
+      },
+      {
+        path: ":id/edit",
+        name: "reserve.edit",
+        component: () => import("./components/pages/reserve/edit.vue"),
+      },
+    ],
   },
   {
     path: "/schedule",
