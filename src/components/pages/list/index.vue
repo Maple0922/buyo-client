@@ -39,62 +39,51 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, provide } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { Day } from "@/types";
-import axios from "axios";
 import { formatDate } from "@/utils/dateFormatter";
 import DailyTimeline from "./daily-timeline.vue";
+
+import { RangeType } from "@/types";
+import { key, useProvide } from "./provider";
+
+const provider = useProvide();
+provide(key, provider);
+const { fetchReservations, days, day } = provider;
 
 const route = useRoute();
 const router = useRouter();
 
-const type = ref<"d" | "w">("d");
+const type = ref<RangeType>("d");
+const page = ref<number>(0);
+
 if (["d", "w"].includes(route.query.t as string)) {
-  type.value = route.query.t as "d" | "w";
+  type.value = route.query.t as RangeType;
+}
+
+if (route.query.p !== undefined) {
+  page.value = parseInt(route.query.p as string);
 }
 
 const onChangeType = () => {
   router.push({ query: { ...route.query, t: type.value } });
-  fetchReservations();
+  fetchReservations(type.value, page.value);
 };
 
 const shiftDate = (diff: number): void => {
   page.value += diff;
   router.push({ query: { ...route.query, p: page.value } });
-  fetchReservations();
+  fetchReservations(type.value, page.value);
 };
 
 const shiftToday = (): void => {
   if (page.value === 0) return;
   page.value = 0;
   router.push({ query: { ...route.query, p: page.value } });
-  fetchReservations();
-};
-
-const page = ref<number>(0);
-if (route.query.p !== undefined) {
-  page.value = parseInt(route.query.p as string);
-}
-
-const days = ref<Day[]>([]);
-const day = ref<Day>({
-  date: "",
-  reservations: [],
-});
-
-const fetchReservations = async () => {
-  const { data } = await axios.get<Day[]>("/reserve", {
-    params: {
-      t: type.value,
-      p: page.value,
-    },
-  });
-  days.value = data;
-  day.value = data[0];
+  fetchReservations(type.value, page.value);
 };
 
 onMounted(async () => {
-  await fetchReservations();
+  fetchReservations(type.value, page.value);
 });
 </script>

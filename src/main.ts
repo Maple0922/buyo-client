@@ -13,7 +13,6 @@ import axios from "axios";
 import { useEnv } from "./utils/environment";
 const { API_URL } = useEnv();
 axios.defaults.baseURL = API_URL;
-// set global axios
 createApp(App).config.globalProperties.$axios = axios;
 
 // setup router
@@ -29,3 +28,5 @@ import { registerSW } from "virtual:pwa-register";
 registerSW();
 
 createApp(App).use(vuetify).use(router).mount("#app");
+
+import "./styles/main.scss";

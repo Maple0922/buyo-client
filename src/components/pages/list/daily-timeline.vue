@@ -1,23 +1,41 @@
 <template>
-  <div class="timeline">
+  <v-container class="timeline">
     <div class="timeline__header">
-      <v-btn
-        variant="text"
-        density="comfortable"
-        color="indigo-darken-4"
-        @click="shift(-1)"
-        icon="mdi-chevron-left"
-      />
+      <div class="timeline__header__left">
+        <v-btn
+          variant="text"
+          density="comfortable"
+          color="indigo-darken-4"
+          @click="shift(-7)"
+          icon="mdi-chevron-double-left"
+        />
+        <v-btn
+          variant="text"
+          density="comfortable"
+          color="indigo-darken-4"
+          @click="shift(-1)"
+          icon="mdi-chevron-left"
+        />
+      </div>
       <p class="header__title">
         {{ formatDate(props.day.date, "YYYY年M月D日 (ddd)") }}
       </p>
-      <v-btn
-        variant="text"
-        density="comfortable"
-        color="indigo-darken-4"
-        @click="shift(1)"
-        icon="mdi-chevron-right"
-      />
+      <div class="timeline__header__right">
+        <v-btn
+          variant="text"
+          density="comfortable"
+          color="indigo-darken-4"
+          @click="shift(1)"
+          icon="mdi-chevron-right"
+        />
+        <v-btn
+          variant="text"
+          density="comfortable"
+          color="indigo-darken-4"
+          @click="shift(7)"
+          icon="mdi-chevron-double-right"
+        />
+      </div>
     </div>
     <div class="timeline__main">
       <div class="main__left">
@@ -45,7 +63,9 @@
         </span>
       </div>
     </div>
-  </div>
+  </v-container>
+  <create-dialog />
+  <!-- <edit-dialog /> -->
 </template>
 
 <script lang="ts" setup>
@@ -53,7 +73,15 @@ import { defineProps, defineEmits } from "vue";
 import { Day } from "@/types";
 import { formatDate } from "@/utils/dateFormatter";
 import { Reservation } from "@/types";
+
 import { useRouter } from "vue-router";
+import CreateDialog from "./dialogs/create.vue";
+// import EditDialog from "./dialogs/edit.vue";
+
+import { strictInject } from "@/utils/strictInject";
+import { key } from "@/components/pages/list/provider";
+
+const { clickedRow, dialogVisible, createForm } = strictInject(key);
 
 const props = defineProps<{ day: Day }>();
 const emits = defineEmits<{ (e: "shift", diff: number): void }>();
@@ -62,19 +90,27 @@ const shift = (diff: number): void => {
   emits("shift", diff);
 };
 
-const times = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22];
-
 const router = useRouter();
 
-const onClickReservation = (reservation: Reservation) => {
-  router.push({ name: "reserve.edit", params: { id: reservation.id } });
-};
+const times = Array.from({ length: 14 }, (_, i) => i + 8);
 
 const onClickTimeline = (e: any) => {
   const date = props.day.date;
-  // const time = Math.floor(e.layerY / 24) / 2 + 8; // 30分ごとに見る場合
-  const time = Math.floor(e.layerY / 48) + 8; // 1時間ごとに見る場合
-  router.push({ name: "reserve", query: { date, time } });
+  const time = Math.floor(e.layerY / 48) + 8;
+  if (!date || time < 8 || time >= 22) return;
+  Object.assign(clickedRow, { date, time });
+  Object.assign(createForm, {
+    date,
+    time: {
+      start: { hour: time, minute: 0 },
+      end: { hour: time + 2, minute: 0 },
+    },
+  });
+  Object.assign(dialogVisible, { create: true });
+};
+
+const onClickReservation = (reservation: Reservation) => {
+  router.push({ name: "reserve.edit", params: { id: reservation.id } });
 };
 
 const generateReservationStyle = (reservation: Reservation) => {
@@ -94,6 +130,7 @@ const generateReservationStyle = (reservation: Reservation) => {
 
 <style lang="scss" scoped>
 .timeline {
+  padding: 0;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -156,7 +193,7 @@ const generateReservationStyle = (reservation: Reservation) => {
         gap: 12px;
         width: 100%;
         height: 100%;
-        background-color: #2431d0cc;
+        background-color: #1a237e;
         border-radius: 4px;
         padding: 2px 8px;
       }
