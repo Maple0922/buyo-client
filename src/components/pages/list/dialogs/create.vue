@@ -1,6 +1,6 @@
 <template>
   <v-dialog v-model="visible" transition="dialog-bottom-transition">
-    <v-card>
+    <v-card :loading="createLoading">
       <v-toolbar density="comfortable" color="indigo-darken-4">
         <v-toolbar-title>
           <v-icon icon="mdi-calendar-edit" size="small" />
@@ -82,11 +82,12 @@
         <v-spacer />
         <v-btn
           color="indigo-darken-4"
-          variant="outlined"
           :loading="createLoading"
+          variant="outlined"
           @click="create"
-          >予約する</v-btn
-        >
+          density="comfortable"
+          icon="mdi-check"
+        />
       </v-card-actions>
     </v-card>
   </v-dialog>
