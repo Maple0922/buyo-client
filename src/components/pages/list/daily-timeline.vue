@@ -92,7 +92,7 @@ const shift = (diff: number): void => {
 
 const router = useRouter();
 
-const times = Array.from({ length: 14 }, (_, i) => i + 8);
+const times = Array.from({ length: 15 }, (_, i) => i + 8);
 
 const onClickTimeline = (e: any) => {
   const date = props.day.date;
