@@ -25,7 +25,8 @@ const range = ref<number>(2);
 
 const onChangeRange = () => {
   const start = createForm.time.start;
-  const endHour = Math.floor(start.hour + range.value);
+
+  const endHour = Math.floor(start.hour + start.minute / 60 + range.value);
   const endMinute =
     (start.minute === 0 && range.value % 1 === 0) ||
     (start.minute === 30 && range.value % 1 === 0.5)
@@ -43,6 +44,9 @@ const onChangeRange = () => {
   });
 
   const endNum = (endHour + endMinute / 60) * 100;
+
+  console.log(endNum);
+  console.log(endNum > 2200);
 
   if (endNum > 2200) {
     const diff = (endNum - 2200) / 50;

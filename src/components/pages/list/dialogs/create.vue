@@ -1,9 +1,5 @@
 <template>
-  <v-dialog
-    v-model="visible"
-    @update:modelValue="onOpen()"
-    transition="dialog-bottom-transition"
-  >
+  <v-dialog v-model="visible" transition="dialog-bottom-transition">
     <v-card>
       <v-toolbar density="comfortable" color="indigo-darken-4">
         <v-toolbar-title>
@@ -103,9 +99,8 @@ import { toRefs, ref, computed } from "vue";
 import RangeToggle from "./forms/range-toggle.vue";
 
 import { formatDate } from "@/utils/dateFormatter";
-const { dialogVisible, clickedRow, createForm, shiftTime } = strictInject(key);
+const { dialogVisible, createForm, shiftTime } = strictInject(key);
 const { create: visible } = toRefs(dialogVisible);
-const { date, time } = toRefs(clickedRow);
 
 const displayDatetime = computed(() => {
   const start = createForm.time.start;
@@ -116,18 +111,6 @@ const displayDatetime = computed(() => {
 });
 
 const showPasscode = ref(false);
-
-const onOpen = () => {
-  console.log(1);
-
-  Object.assign(createForm, {
-    date: date.value,
-    time: {
-      start: { hour: time.value, minute: 0 },
-      end: { hour: time.value + 2, minute: 0 },
-    },
-  });
-};
 
 const createLoading = ref(false);
 const create = () => {
