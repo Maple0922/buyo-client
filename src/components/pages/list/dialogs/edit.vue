@@ -266,15 +266,19 @@ const destroy = async () => {
 const generateEditRequest = (editForm: ReservationEditForm) => {
   const start = editForm.time.start;
   const end = editForm.time.end;
+
+    const startTime = formatDate(
+    `${editForm.date} ${start.hour < 10 ? `0${start.hour}` : start.hour}:${start.minute === 0 ? "00" : "30"}`,
+    "YYYY-MM-DD HH:mm:ss"
+  );
+  const endTime = formatDate(
+    `${editForm.date} ${end.hour < 10 ? `0${end.hour}` : end.hour}:${end.minute === 0 ? "00" : "30"}`,
+    "YYYY-MM-DD HH:mm:ss"
+  );
+
   return {
-    start: formatDate(
-      `${editForm.date} ${start.hour}:${start.minute}`,
-      "YYYY-MM-DD HH:mm:ss"
-    ),
-    end: formatDate(
-      `${editForm.date} ${end.hour}:${end.minute}`,
-      "YYYY-MM-DD HH:mm:ss"
-    ),
+    start: startTime,
+    end: endTime,
     name: editForm.name,
     passcode: editForm.code,
   };

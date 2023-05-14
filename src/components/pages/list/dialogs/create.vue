@@ -207,15 +207,19 @@ const create = async () => {
 const generateCreateRequest = (createForm: ReservationCreateForm) => {
   const start = createForm.time.start;
   const end = createForm.time.end;
+
+  const startTime = formatDate(
+    `${createForm.date} ${start.hour < 10 ? `0${start.hour}` : start.hour}:${start.minute === 0 ? "00" : "30"}`,
+    "YYYY-MM-DD HH:mm:ss"
+  );
+  const endTime = formatDate(
+    `${createForm.date} ${end.hour < 10 ? `0${end.hour}` : end.hour}:${end.minute === 0 ? "00" : "30"}`,
+    "YYYY-MM-DD HH:mm:ss"
+  );
+
   return {
-    start: formatDate(
-      `${createForm.date} ${start.hour}:${start.minute}`,
-      "YYYY-MM-DD HH:mm:ss"
-    ),
-    end: formatDate(
-      `${createForm.date} ${end.hour}:${end.minute}`,
-      "YYYY-MM-DD HH:mm:ss"
-    ),
+    start: startTime,
+    end: endTime,
     name: createForm.name,
     passcode: createForm.code,
   };
