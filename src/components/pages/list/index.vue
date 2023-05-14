@@ -11,6 +11,16 @@
       </v-btn>
     </v-col>
     <v-spacer />
+    <v-col align="end">
+      <v-btn
+        prepend-icon="mdi-bell-ring"
+        variant="text"
+        color="green text-none"
+        @click="onClickLineBot"
+      >
+        LINEBot
+      </v-btn>
+    </v-col>
     <v-col v-if="false">
       <v-btn-toggle
         v-model="type"
@@ -80,6 +90,10 @@ const shiftToday = (): void => {
   page.value = 0;
   router.push({ query: { ...route.query, p: page.value } });
   fetchReservations();
+};
+
+const onClickLineBot = (): void => {
+  window.open("https://lin.ee/638d84X");
 };
 
 onMounted(async () => {
