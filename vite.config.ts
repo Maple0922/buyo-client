@@ -25,9 +25,8 @@ export default defineConfig({
         short_name: "BUYO",
         icons: [
           {
-            src: "/icons/android-chrome-192x192.png",
-            sizes: "192x192",
-            type: "image/png",
+            src: "/favicon.ico",
+            sizes: "256x256"
           },
         ],
         start_url: "/",
