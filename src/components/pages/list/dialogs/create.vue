@@ -39,41 +39,75 @@
               icon="mdi-chevron-right"
             />
           </v-col>
-        </v-row>
-        <v-row class="mb-2">
           <v-col align="center">
             <range-toggle />
+          </v-col>
+          <v-col>
+            <v-alert
+              v-if="duplicateBands.length"
+              density="compact"
+              type="error"
+              variant="tonal"
+            >
+              <template v-slot:title>
+                <span class="text-caption font-weight-bold d-inline-block py-1"
+                  >時間が重複しています</span
+                >
+              </template>
+              <template v-slot:text>
+                <v-container class="pa-3">
+                  <v-row
+                    v-for="band in duplicateBands"
+                    :key="band.id"
+                    class="text-caption"
+                    style="gap: 12px; white-space: nowrap; flex-wrap: nowrap"
+                  >
+                    <span>{{ band.time.start }} - {{ band.time.end }}</span>
+                    <span style="overflow: hidden; text-overflow: ellipsis">{{
+                      band.name
+                    }}</span>
+                  </v-row>
+                </v-container>
+              </template>
+            </v-alert>
+            <v-alert v-else density="compact" type="success" variant="tonal">
+              <template v-slot:title>
+                <span class="text-caption font-weight-bold d-inline-block py-1"
+                  >予約可能です</span
+                >
+              </template>
+            </v-alert>
           </v-col>
         </v-row>
         <v-row>
           <v-col>
             <v-text-field
               v-model="createForm.name"
-              :counter="30"
+              :counter="114514"
               label="バンド名"
               required
               color="indigo-darken-4"
               variant="outlined"
               density="compact"
-              hide-details
+              :rules="rules.name"
             />
           </v-col>
         </v-row>
         <v-row>
-          <v-col :cols="6">
+          <v-col :cols="10">
             <v-text-field
               v-model="createForm.passcode"
               :counter="4"
               label="パスコード"
+              inputmode="numeric"
               :append-inner-icon="showPasscode ? 'mdi-eye' : 'mdi-eye-off'"
               :type="showPasscode ? 'text' : 'password'"
               required
               color="indigo-darken-4"
               variant="outlined"
               density="compact"
-              @update:modelValue="createForm.passcode.substring(0, 4)"
               @click:append-inner="showPasscode = !showPasscode"
-              hint="4 digits"
+              :rules="rules.passcode"
             />
           </v-col>
         </v-row>
@@ -83,10 +117,10 @@
         <v-btn
           color="indigo-darken-4"
           :loading="createLoading"
-          variant="outlined"
+          :disabled="createDisabled"
+          variant="flat"
           @click="create"
-          density="comfortable"
-          icon="mdi-check"
+          icon="mdi-check-bold"
         />
       </v-card-actions>
     </v-card>
@@ -97,10 +131,19 @@
 import { strictInject } from "@/utils/strictInject";
 import { key } from "@/components/pages/list/provider";
 import { toRefs, ref, computed } from "vue";
+import axios from "axios";
 import RangeToggle from "./forms/range-toggle.vue";
+import { ReservationCreateForm, Reservation } from "@/types";
 
 import { formatDate } from "@/utils/dateFormatter";
-const { dialogVisible, createForm, shiftTime } = strictInject(key);
+const {
+  dialogVisible,
+  createForm,
+  day,
+  shiftTime,
+  setSnackbar,
+  fetchReservations,
+} = strictInject(key);
 const { create: visible } = toRefs(dialogVisible);
 
 const displayDatetime = computed(() => {
@@ -111,13 +154,82 @@ const displayDatetime = computed(() => {
   return `${start.hour}:${startMinute} - ${end.hour}:${endMinute}`;
 });
 
+const rules = {
+  name: [
+    (v: string) => !!v || "バンド名は必須です",
+    (v: string) =>
+      (v && v.length <= 114514) || "114514文字以内で入力してください",
+  ],
+  passcode: [
+    (v: string) => !!v || "パスコードは必須です",
+    (v: string) => /^\d{4}$/.test(v) || "4桁の数字で入力してください",
+  ],
+};
+
 const showPasscode = ref(false);
 
 const createLoading = ref(false);
-const create = () => {
+
+const createDisabled = computed(() => {
+  return (
+    !createForm.name ||
+    !createForm.passcode ||
+    createForm.name.length > 114514 ||
+    !/^\d{4}$/.test(createForm.passcode) ||
+    duplicateBands.value.length
+  );
+});
+
+const create = async () => {
   createLoading.value = true;
-  console.log("create");
-  console.log(createForm);
-  visible.value = false;
+
+  const request = generateCreateRequest(createForm);
+
+  try {
+    await axios.post("/reserve", request);
+    await fetchReservations();
+    setSnackbar("indigo-darken-4", `「${request.name}」の予約をしました。`);
+  } catch (error) {
+    setSnackbar(
+      "red-darken-4",
+      `エラーが発生しました。お手数ですが時間をおいて再度お試しください。`
+    );
+  } finally {
+    createLoading.value = false;
+    visible.value = false;
+    Object.assign(createForm, {
+      name: "",
+      passcode: "",
+    });
+  }
 };
+
+const generateCreateRequest = (createForm: ReservationCreateForm) => {
+  const start = createForm.time.start;
+  const end = createForm.time.end;
+  return {
+    start: formatDate(
+      `${createForm.date} ${start.hour}:${start.minute}`,
+      "YYYY-MM-DD HH:mm:ss"
+    ),
+    end: formatDate(
+      `${createForm.date} ${end.hour}:${end.minute}`,
+      "YYYY-MM-DD HH:mm:ss"
+    ),
+    name: createForm.name,
+    passcode: createForm.passcode,
+  };
+};
+
+const duplicateBands = computed<Reservation[]>(() => {
+  const start = createForm.time.start;
+  const end = createForm.time.end;
+  const startNum = Number(`${start.hour}${start.minute === 30 ? "30" : "00"}`);
+  const endNum = Number(`${end.hour}${end.minute === 30 ? "30" : "00"}`);
+  return day.value.reservations.filter(({ time }) => {
+    const start = Number(time.start.replace(":", ""));
+    const end = Number(time.end.replace(":", ""));
+    return startNum < end && endNum > start;
+  });
+});
 </script>

@@ -36,26 +36,25 @@
       </p>
     </v-col>
   </v-row>
+  <snackbar />
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, provide } from "vue";
+import { onMounted, provide } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { formatDate } from "@/utils/dateFormatter";
 import DailyTimeline from "./daily-timeline.vue";
+import Snackbar from "./snackbar.vue";
 
 import { RangeType } from "@/types";
 import { key, useProvide } from "./provider";
 
 const provider = useProvide();
 provide(key, provider);
-const { fetchReservations, days, day } = provider;
+const { fetchReservations, days, day, type, page } = provider;
 
 const route = useRoute();
 const router = useRouter();
-
-const type = ref<RangeType>("d");
-const page = ref<number>(0);
 
 if (["d", "w"].includes(route.query.t as string)) {
   type.value = route.query.t as RangeType;
@@ -67,23 +66,23 @@ if (route.query.p !== undefined) {
 
 const onChangeType = () => {
   router.push({ query: { ...route.query, t: type.value } });
-  fetchReservations(type.value, page.value);
+  fetchReservations();
 };
 
 const shiftDate = (diff: number): void => {
   page.value += diff;
   router.push({ query: { ...route.query, p: page.value } });
-  fetchReservations(type.value, page.value);
+  fetchReservations();
 };
 
 const shiftToday = (): void => {
   if (page.value === 0) return;
   page.value = 0;
   router.push({ query: { ...route.query, p: page.value } });
-  fetchReservations(type.value, page.value);
+  fetchReservations();
 };
 
 onMounted(async () => {
-  fetchReservations(type.value, page.value);
+  fetchReservations();
 });
 </script>

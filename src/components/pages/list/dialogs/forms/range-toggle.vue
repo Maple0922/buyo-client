@@ -15,13 +15,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
 import { strictInject } from "@/utils/strictInject";
 import { key } from "@/components/pages/list/provider";
 
-const { createForm, shiftTime } = strictInject(key);
-
-const range = ref<number>(2);
+const { createForm, range, shiftTime } = strictInject(key);
 
 const onChangeRange = () => {
   const start = createForm.time.start;
@@ -44,9 +41,6 @@ const onChangeRange = () => {
   });
 
   const endNum = (endHour + endMinute / 60) * 100;
-
-  console.log(endNum);
-  console.log(endNum > 2200);
 
   if (endNum > 2200) {
     const diff = (endNum - 2200) / 50;

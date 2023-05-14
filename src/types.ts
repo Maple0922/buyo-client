@@ -12,6 +12,12 @@ export interface Day {
   reservations: Reservation[];
 }
 
+export interface Snackbar {
+  visible: boolean;
+  color: string;
+  text: string;
+}
+
 export type RangeType = "d" | "w";
 
 export interface DialogVisible {

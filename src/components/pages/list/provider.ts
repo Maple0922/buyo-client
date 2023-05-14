@@ -2,6 +2,7 @@ import { ref, InjectionKey, reactive } from "vue";
 import axios from "axios";
 import {
   Day,
+  Snackbar,
   RangeType,
   ClickedRow,
   DialogVisible,
@@ -11,9 +12,18 @@ import {
 export const key: InjectionKey<ReturnType<typeof useProvide>> = Symbol("List");
 
 export const useProvide = () => {
+  const type = ref<RangeType>("d");
+  const page = ref<number>(0);
+
   const day = ref<Day>({
     date: "",
     reservations: [],
+  });
+
+  const snackbar = reactive<Snackbar>({
+    visible: false,
+    color: "",
+    text: "",
   });
 
   const days = ref<Day[]>([]);
@@ -37,6 +47,8 @@ export const useProvide = () => {
     },
     passcode: "",
   });
+
+  const range = ref<number>(2);
 
   const shiftTime = (diffMinute: 30 | -30) => {
     const start = createForm.time.start;
@@ -71,24 +83,37 @@ export const useProvide = () => {
     });
   };
 
-  const fetchReservations = async (type: RangeType, page: number) => {
+  const fetchReservations = async () => {
     const { data } = await axios.get<Day[]>("/reserve", {
       params: {
-        t: type,
-        p: page,
+        t: type.value,
+        p: page.value,
       },
     });
     days.value = data;
     day.value = data[0];
   };
 
+  const setSnackbar = (color: string, text: string) => {
+    Object.assign(snackbar, {
+      visible: true,
+      color,
+      text,
+    });
+  };
+
   return {
+    type,
+    page,
+    snackbar,
     days,
     day,
     dialogVisible,
     clickedRow,
     createForm,
+    range,
     shiftTime,
     fetchReservations,
+    setSnackbar,
   };
 };
