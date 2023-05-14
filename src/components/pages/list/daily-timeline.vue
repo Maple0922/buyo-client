@@ -81,7 +81,7 @@ import CreateDialog from "./dialogs/create.vue";
 import { strictInject } from "@/utils/strictInject";
 import { key } from "@/components/pages/list/provider";
 
-const { clickedRow, dialogVisible, createForm } = strictInject(key);
+const { clickedRow, dialogVisible, createForm, range } = strictInject(key);
 
 const props = defineProps<{ day: Day }>();
 const emits = defineEmits<{ (e: "shift", diff: number): void }>();
@@ -99,13 +99,17 @@ const onClickTimeline = (e: any) => {
   const time = Math.floor(e.layerY / 48) + 8;
   if (!date || time < 8 || time >= 22) return;
   Object.assign(clickedRow, { date, time });
+
+  range.value = time === 21 ? 1 : 2;
+
   Object.assign(createForm, {
     date,
     time: {
       start: { hour: time, minute: 0 },
-      end: { hour: time + 2, minute: 0 },
+      end: { hour: time + range.value, minute: 0 },
     },
   });
+
   Object.assign(dialogVisible, { create: true });
 };
 
