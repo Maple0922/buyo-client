@@ -18,7 +18,7 @@
 import { strictInject } from "@/utils/strictInject";
 import { key } from "@/components/pages/list/provider";
 
-const { editForm, editRange } = strictInject(key);
+const { editForm, editRange, shiftTime } = strictInject(key);
 
 const onChangeRange = () => {
   const start = editForm.time.start;
@@ -39,5 +39,14 @@ const onChangeRange = () => {
       end: { hour: endHour, minute: endMinute },
     },
   });
+
+    const endNum = (endHour + endMinute / 60) * 100;
+
+  if (endNum > 2200) {
+    const diff = (endNum - 2200) / 50;
+    for (let i = 0; i < diff; i++) {
+      shiftTime(-30, "edit");
+    }
+  }
 };
 </script>
