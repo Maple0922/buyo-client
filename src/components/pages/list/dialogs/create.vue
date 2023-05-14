@@ -189,10 +189,10 @@ const create = async () => {
     await axios.post("/reserve", request);
     await fetchReservations();
     setSnackbar("indigo-darken-4", `「${request.name}」の予約をしました。`);
-  } catch (error) {
+  } catch (error: any) {
     setSnackbar(
       "red-darken-4",
-      `エラーが発生しました。お手数ですが時間をおいて再度お試しください。`
+      `エラーが発生しました。時間をおいて再度お試しください。(メッセージ: ${error.message})`
     );
   } finally {
     createLoading.value = false;
