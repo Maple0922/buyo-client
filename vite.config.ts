@@ -21,7 +21,7 @@ export default defineConfig({
     VitePWA({
       manifest: {
         lang: "ja",
-        name: "BUYO v2",
+        name: "BUYO",
         short_name: "BUYO",
         icons: [
           {
