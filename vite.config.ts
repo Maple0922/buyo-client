@@ -25,8 +25,14 @@ export default defineConfig({
         short_name: "BUYO",
         icons: [
           {
-            src: "/favicon.ico",
-            sizes: "256x256"
+            src: "./favicon.ico",
+            sizes: "256x256",
+            type: "image/x-icon",
+          },
+          {
+            src: "./favicon.png",
+            sizes: "256x256",
+            type: "image/png",
           },
         ],
         start_url: "/",
