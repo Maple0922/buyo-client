@@ -102,18 +102,14 @@ export const useProvide = () => {
   };
 
   const fetchReservations = async () => {
-    try {
-      const { data } = await axios.get<Day[]>("/reserve", {
-        params: {
-          t: type.value,
-          p: page.value,
-        },
-      });
-      days.value = data;
-      day.value = data[0];
-    } catch (error: any) {
-      setSnackbar("error", error.response.data.message);
-    }
+    const { data } = await axios.get<Day[]>("/reserve", {
+      params: {
+        t: type.value,
+        p: page.value,
+      },
+    });
+    days.value = data;
+    day.value = data[0];
   };
 
   const setSnackbar = (color: string, text: string) => {
