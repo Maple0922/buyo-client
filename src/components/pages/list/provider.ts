@@ -7,6 +7,7 @@ import {
   ClickedRow,
   DialogVisible,
   ReservationCreateForm,
+  ReservationEditForm,
 } from "@/types";
 
 export const key: InjectionKey<ReturnType<typeof useProvide>> = Symbol("List");
@@ -45,14 +46,27 @@ export const useProvide = () => {
       start: { hour: 0, minute: 0 },
       end: { hour: 0, minute: 0 },
     },
-    passcode: "",
+    code: "",
   });
 
-  const range = ref<number>(2);
+  const editForm = reactive<ReservationEditForm>({
+    id: 0,
+    name: "",
+    date: "",
+    time: {
+      start: { hour: 0, minute: 0 },
+      end: { hour: 0, minute: 0 },
+    },
+    code: "",
+  });
 
-  const shiftTime = (diffMinute: 30 | -30) => {
-    const start = createForm.time.start;
-    const end = createForm.time.end;
+  const createRange = ref<number>(2);
+  const editRange = ref<number>(2);
+
+  const shiftTime = (diffMinute: 30 | -30, type: "create" | "edit") => {
+    const start =
+      type === "create" ? createForm.time.start : editForm.time.start;
+    const end = type === "create" ? createForm.time.end : editForm.time.end;
     if (
       (end.hour >= 22 && end.minute === 0 && diffMinute === 30) ||
       (start.hour <= 8 && start.minute === 0 && diffMinute === -30)
@@ -77,10 +91,14 @@ export const useProvide = () => {
     const startMinute = start.minute === 30 ? 0 : 30;
     const endMinute = end.minute === 30 ? 0 : 30;
 
-    Object.assign(createForm.time, {
+    const newTime = {
       start: { hour: startHour, minute: startMinute },
       end: { hour: endHour, minute: endMinute },
-    });
+    };
+
+    type === "create"
+      ? Object.assign(createForm.time, newTime)
+      : Object.assign(editForm.time, newTime);
   };
 
   const fetchReservations = async () => {
@@ -111,7 +129,9 @@ export const useProvide = () => {
     dialogVisible,
     clickedRow,
     createForm,
-    range,
+    editForm,
+    createRange,
+    editRange,
     shiftTime,
     fetchReservations,
     setSnackbar,

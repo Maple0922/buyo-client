@@ -65,7 +65,7 @@
     </div>
   </v-container>
   <create-dialog />
-  <!-- <edit-dialog /> -->
+  <edit-dialog />
 </template>
 
 <script lang="ts" setup>
@@ -74,14 +74,20 @@ import { Day } from "@/types";
 import { formatDate } from "@/utils/dateFormatter";
 import { Reservation } from "@/types";
 
-import { useRouter } from "vue-router";
 import CreateDialog from "./dialogs/create.vue";
-// import EditDialog from "./dialogs/edit.vue";
+import EditDialog from "./dialogs/edit.vue";
 
 import { strictInject } from "@/utils/strictInject";
 import { key } from "@/components/pages/list/provider";
 
-const { clickedRow, dialogVisible, createForm, range } = strictInject(key);
+const {
+  clickedRow,
+  dialogVisible,
+  createForm,
+  editForm,
+  createRange,
+  editRange,
+} = strictInject(key);
 
 const props = defineProps<{ day: Day }>();
 const emits = defineEmits<{ (e: "shift", diff: number): void }>();
@@ -89,8 +95,6 @@ const emits = defineEmits<{ (e: "shift", diff: number): void }>();
 const shift = (diff: number): void => {
   emits("shift", diff);
 };
-
-const router = useRouter();
 
 const times = Array.from({ length: 15 }, (_, i) => i + 8);
 
@@ -100,21 +104,41 @@ const onClickTimeline = (e: any) => {
   if (!date || time < 8 || time >= 22) return;
   Object.assign(clickedRow, { date, time });
 
-  range.value = time === 21 ? 1 : 2;
+  createRange.value = time === 21 ? 1 : 2;
 
   Object.assign(createForm, {
+    name: "",
     date,
     time: {
       start: { hour: time, minute: 0 },
-      end: { hour: time + range.value, minute: 0 },
+      end: { hour: time + createRange.value, minute: 0 },
     },
+    code: "",
   });
 
   Object.assign(dialogVisible, { create: true });
 };
 
 const onClickReservation = (reservation: Reservation) => {
-  router.push({ name: "reserve.edit", params: { id: reservation.id } });
+  const [startHour, startMinute] = reservation.time.start.split(":");
+  const [endHour, endMinute] = reservation.time.end.split(":");
+  Object.assign(editForm, {
+    id: reservation.id,
+    name: reservation.name,
+    date: props.day.date,
+    time: {
+      start: { hour: Number(startHour), minute: Number(startMinute) },
+      end: { hour: Number(endHour), minute: Number(endMinute) },
+    },
+    code: "",
+  });
+
+  const startNum = Number(`${startHour}${startMinute === "30" ? "50" : "00"}`);
+  const endNum = Number(`${endHour}${endMinute === "30" ? "50" : "00"}`);
+
+  editRange.value = (endNum - startNum) / 100;
+
+  Object.assign(dialogVisible, { edit: true });
 };
 
 const generateReservationStyle = (reservation: Reservation) => {

@@ -41,7 +41,7 @@ export interface ReservationCreateForm {
     start: Time;
     end: Time;
   };
-  passcode: string;
+  code: string;
 }
 
 export interface ReservationEditForm extends ReservationCreateForm {

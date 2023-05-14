@@ -21,7 +21,7 @@
               variant="text"
               density="comfortable"
               color="indigo-darken-4"
-              @click="shiftTime(-30)"
+              @click="shiftTime(-30, 'create')"
               icon="mdi-chevron-left"
             />
           </v-col>
@@ -35,7 +35,7 @@
               variant="text"
               density="comfortable"
               color="indigo-darken-4"
-              @click="shiftTime(30)"
+              @click="shiftTime(30, 'create')"
               icon="mdi-chevron-right"
             />
           </v-col>
@@ -96,7 +96,7 @@
         <v-row>
           <v-col :cols="10">
             <v-text-field
-              v-model="createForm.passcode"
+              v-model="createForm.code"
               :counter="4"
               label="パスコード"
               inputmode="numeric"
@@ -107,7 +107,7 @@
               variant="outlined"
               density="compact"
               @click:append-inner="showPasscode = !showPasscode"
-              :rules="rules.passcode"
+              :rules="rules.code"
             />
           </v-col>
         </v-row>
@@ -132,7 +132,7 @@ import { strictInject } from "@/utils/strictInject";
 import { key } from "@/components/pages/list/provider";
 import { toRefs, ref, computed } from "vue";
 import axios from "axios";
-import RangeToggle from "./forms/range-toggle.vue";
+import RangeToggle from "./forms/create-range-toggle.vue";
 import { ReservationCreateForm, Reservation } from "@/types";
 
 import { formatDate } from "@/utils/dateFormatter";
@@ -160,7 +160,7 @@ const rules = {
     (v: string) =>
       (v && v.length <= 114514) || "114514文字以内で入力してください",
   ],
-  passcode: [
+  code: [
     (v: string) => !!v || "パスコードは必須です",
     (v: string) => /^\d{4}$/.test(v) || "4桁の数字で入力してください",
   ],
@@ -173,9 +173,9 @@ const createLoading = ref(false);
 const createDisabled = computed(() => {
   return (
     !createForm.name ||
-    !createForm.passcode ||
+    !createForm.code ||
     createForm.name.length > 114514 ||
-    !/^\d{4}$/.test(createForm.passcode) ||
+    !/^\d{4}$/.test(createForm.code) ||
     duplicateBands.value.length
   );
 });
@@ -199,7 +199,7 @@ const create = async () => {
     visible.value = false;
     Object.assign(createForm, {
       name: "",
-      passcode: "",
+      code: "",
     });
   }
 };
@@ -217,7 +217,7 @@ const generateCreateRequest = (createForm: ReservationCreateForm) => {
       "YYYY-MM-DD HH:mm:ss"
     ),
     name: createForm.name,
-    passcode: createForm.passcode,
+    passcode: createForm.code,
   };
 };
 
