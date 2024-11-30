@@ -33,7 +33,11 @@
       <daily-timeline :day="day" @shiftDay="shiftDay" />
     </v-col>
     <v-col v-else-if="type === 'w'">
-      <weekly-timeline :days="days" @shiftWeek="shiftWeek" />
+      <weekly-timeline
+        :days="days"
+        @shiftWeek="shiftWeek"
+        @moveToDaily="moveToDaily"
+      />
     </v-col>
   </v-row>
   <snackbar />
@@ -78,6 +82,20 @@ const shiftDay = (diff: number): void => {
 const shiftWeek = (diff: number): void => {
   page.value += diff * 7;
   router.push({ query: { ...route.query, p: page.value } });
+  fetchReservations();
+};
+
+const moveToDaily = (date: string): void => {
+  // 今日とその日の日付差分を取得
+  const today = new Date();
+  const target = new Date(date);
+
+  const diff =
+    Math.floor((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) +
+    1;
+  type.value = "d";
+  page.value = diff;
+  router.push({ query: { ...route.query, t: type.value, p: page.value } });
   fetchReservations();
 };
 

@@ -11,7 +11,7 @@
         />
       </div>
       <p class="header__title">
-        <span>{{ displayDateRange }} </span>
+        <span v-if="!isLoading">{{ displayDateRange }} </span>
       </p>
       <div class="timeline__header__right">
         <v-btn
@@ -35,6 +35,7 @@
           v-for="day in props.days"
           :key="day.date"
           :style="weekendColorStyle(day.date)"
+          @click="moveToDaily(day.date)"
         >
           <p class="table-header__center__date__day">
             {{ formatDate(day.date, "D") }}
@@ -101,13 +102,21 @@ const {
   editForm,
   createRange,
   editRange,
+  isLoading,
 } = strictInject(key);
 
 const props = defineProps<{ days: Day[] }>();
-const emits = defineEmits<{ (e: "shiftWeek", diff: number): void }>();
+const emits = defineEmits<{
+  (e: "shiftWeek", diff: number): void;
+  (e: "moveToDaily", date: string): void;
+}>();
 
 const shiftWeek = (diff: number): void => {
   emits("shiftWeek", diff);
+};
+
+const moveToDaily = (date: string): void => {
+  emits("moveToDaily", date);
 };
 
 const times = Array.from({ length: 15 }, (_, i) => i + 8);

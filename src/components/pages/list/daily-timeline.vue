@@ -18,7 +18,9 @@
         />
       </div>
       <p class="header__title">
-        <span>{{ formatDate(props.day.date, "YYYY年M月D日 (ddd)") }}</span>
+        <span v-if="!isLoading">{{
+          formatDate(props.day.date, "YYYY年M月D日 (ddd)")
+        }}</span>
       </p>
       <div class="timeline__header__right">
         <v-btn
@@ -87,6 +89,7 @@ const {
   editForm,
   createRange,
   editRange,
+  isLoading,
 } = strictInject(key);
 
 const props = defineProps<{ day: Day }>();

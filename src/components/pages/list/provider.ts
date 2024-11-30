@@ -107,7 +107,9 @@ export const useProvide = () => {
       : Object.assign(editForm.time, newTime);
   };
 
+  const isLoading = ref<boolean>(false);
   const fetchReservations = async () => {
+    isLoading.value = true;
     const { data } = await axios.get<Day[]>("/reserve", {
       params: {
         t: type.value,
@@ -116,6 +118,7 @@ export const useProvide = () => {
     });
     days.value = data;
     day.value = data[0];
+    isLoading.value = false;
   };
 
   const setSnackbar = (color: string, text: string) => {
@@ -138,6 +141,7 @@ export const useProvide = () => {
     editForm,
     createRange,
     editRange,
+    isLoading,
     shiftTime,
     fetchReservations,
     setSnackbar,
