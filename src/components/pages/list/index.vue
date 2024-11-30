@@ -76,7 +76,7 @@ const shiftDay = (diff: number): void => {
 };
 
 const shiftWeek = (diff: number): void => {
-  page.value += diff;
+  page.value += diff * 7;
   router.push({ query: { ...route.query, p: page.value } });
   fetchReservations();
 };
