@@ -50,6 +50,7 @@
       </div>
       <div class="main__reservations">
         <span
+          v-if="!isLoading"
           class="main__reservations__item"
           v-for="reservation in props.day.reservations"
           :key="reservation.id"

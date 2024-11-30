@@ -152,7 +152,7 @@ import { formatDate } from "@/utils/dateFormatter";
 const {
   dialogVisible,
   editForm,
-  day,
+  days,
   shiftTime,
   setSnackbar,
   fetchReservations,
@@ -267,12 +267,16 @@ const generateEditRequest = (editForm: ReservationEditForm) => {
   const start = editForm.time.start;
   const end = editForm.time.end;
 
-    const startTime = formatDate(
-    `${editForm.date} ${start.hour < 10 ? `0${start.hour}` : start.hour}:${start.minute === 0 ? "00" : "30"}`,
+  const startTime = formatDate(
+    `${editForm.date} ${start.hour < 10 ? `0${start.hour}` : start.hour}:${
+      start.minute === 0 ? "00" : "30"
+    }`,
     "YYYY-MM-DD HH:mm:ss"
   );
   const endTime = formatDate(
-    `${editForm.date} ${end.hour < 10 ? `0${end.hour}` : end.hour}:${end.minute === 0 ? "00" : "30"}`,
+    `${editForm.date} ${end.hour < 10 ? `0${end.hour}` : end.hour}:${
+      end.minute === 0 ? "00" : "30"
+    }`,
     "YYYY-MM-DD HH:mm:ss"
   );
 
@@ -293,10 +297,17 @@ const duplicateBands = computed<Reservation[]>(() => {
   const end = editForm.time.end;
   const startNum = Number(`${start.hour}${start.minute === 30 ? "30" : "00"}`);
   const endNum = Number(`${end.hour}${end.minute === 30 ? "30" : "00"}`);
-  return day.value.reservations.filter(({ id, time }) => {
-    const start = Number(time.start.replace(":", ""));
-    const end = Number(time.end.replace(":", ""));
-    return startNum < end && endNum > start && id !== editForm.id;
-  });
+  return days.value
+    .find(({ date }) => date === editForm.date)
+    ?.reservations.filter(({ id, time }) => {
+      const start = Number(time.start.replace(":", ""));
+      const end = Number(time.end.replace(":", ""));
+      return startNum < end && endNum > start && id !== editForm.id;
+    })
+    .sort((a, b) => {
+      const startA = Number(a.time.start.replace(":", ""));
+      const startB = Number(b.time.start.replace(":", ""));
+      return startA - startB;
+    }) as Reservation[];
 });
 </script>
