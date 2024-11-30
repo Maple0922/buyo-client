@@ -5,6 +5,7 @@ import {
   Snackbar,
   RangeType,
   ClickedRow,
+  ClickedWeeklyRow,
   DialogVisible,
   ReservationCreateForm,
   ReservationEditForm,
@@ -36,6 +37,11 @@ export const useProvide = () => {
 
   const clickedRow = reactive<ClickedRow>({
     date: "",
+    time: 0,
+  });
+
+  const ClickedWeeklyRow = reactive<ClickedWeeklyRow>({
+    date: 0,
     time: 0,
   });
 

@@ -30,6 +30,11 @@ export interface ClickedRow {
   time: number;
 }
 
+export interface ClickedWeeklyRow {
+  date: number;
+  time: number;
+}
+
 interface Time {
   hour: number;
   minute: number;

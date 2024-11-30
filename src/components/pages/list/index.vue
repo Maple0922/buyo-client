@@ -6,44 +6,34 @@
         prepend-icon="mdi-calendar-today"
         variant="outlined"
         @click="shiftToday"
+        height="38"
       >
         Today
       </v-btn>
     </v-col>
     <v-spacer />
-    <v-col align="end">
-      <v-btn
-        prepend-icon="mdi-bell-ring"
-        variant="text"
-        color="green text-none"
-        @click="onClickLineBot"
-      >
-        LINEBot
-      </v-btn>
-    </v-col>
-    <v-col v-if="false">
+    <v-col>
       <v-btn-toggle
         v-model="type"
         rounded="md"
         color="indigo-darken-4"
         group
         mandatory
+        divided
         border
         density="comfortable"
       >
-        <v-btn value="d" @click="onChangeType">Daily</v-btn>
-        <v-btn value="w" @click="onChangeType">Weekly</v-btn>
+        <v-btn value="d" size="small" @click="onChangeType">Daily</v-btn>
+        <v-btn value="w" size="small" @click="onChangeType">Weekly</v-btn>
       </v-btn-toggle>
     </v-col>
   </v-row>
   <v-row>
     <v-col v-if="type === 'd'">
-      <daily-timeline :day="day" @shift="shiftDate" />
+      <daily-timeline :day="day" @shiftDay="shiftDay" />
     </v-col>
     <v-col v-else-if="type === 'w'">
-      <p class="text-h6 font-weight-bold" v-for="(day, key) in days" :key="key">
-        {{ formatDate(day.date, "M/D(ddd)") }}
-      </p>
+      <weekly-timeline :days="days" @shiftWeek="shiftWeek" />
     </v-col>
   </v-row>
   <snackbar />
@@ -52,8 +42,8 @@
 <script lang="ts" setup>
 import { onMounted, provide } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { formatDate } from "@/utils/dateFormatter";
 import DailyTimeline from "./daily-timeline.vue";
+import WeeklyTimeline from "./weekly-timeline.vue";
 import Snackbar from "./snackbar.vue";
 
 import { RangeType } from "@/types";
@@ -79,24 +69,30 @@ const onChangeType = () => {
   fetchReservations();
 };
 
-const shiftDate = (diff: number): void => {
+const shiftDay = (diff: number): void => {
+  page.value += diff;
+  router.push({ query: { ...route.query, p: page.value } });
+  fetchReservations();
+};
+
+const shiftWeek = (diff: number): void => {
   page.value += diff;
   router.push({ query: { ...route.query, p: page.value } });
   fetchReservations();
 };
 
 const shiftToday = (): void => {
-  if (page.value === 0) return;
+  if (page.value === 0 && type.value === "d") return;
+  type.value = "d";
   page.value = 0;
   router.push({ query: { ...route.query, p: page.value } });
   fetchReservations();
 };
 
-const onClickLineBot = (): void => {
-  window.open("https://lin.ee/638d84X");
-};
-
 onMounted(async () => {
+  console.log(route.query);
+
+  type.value = (route.query.t as RangeType) || "d";
   fetchReservations();
 });
 </script>
